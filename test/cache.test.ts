@@ -405,6 +405,4 @@ describe('Cache System', () => {
       .catch(() => false);
     expect(customManifestExists).toBe(true);
   });
-}, {
-  sequential: true
 }); 
