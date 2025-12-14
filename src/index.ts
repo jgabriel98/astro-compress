@@ -46,9 +46,12 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
         ...options,
         png: { ...defaultConfig.png, ...options.png },
         jpeg: { ...defaultConfig.jpeg, ...options.jpeg },
+        jxl: { ...defaultConfig.jxl, ...options.jxl },
         webp: { ...defaultConfig.webp, ...options.webp },
         avif: { ...defaultConfig.avif, ...options.avif },
         heif: { ...defaultConfig.heif, ...options.heif },
+        gif: { ...defaultConfig.gif, ...options.gif },
+        tiff: { ...defaultConfig.tiff, ...options.tiff },
         html: { ...defaultConfig.html, ...options.html },
         js: { ...defaultConfig.js, ...options.js },
         svg: { ...defaultConfig.svg, ...options.svg }
