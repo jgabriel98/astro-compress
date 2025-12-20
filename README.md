@@ -1,3 +1,8 @@
+[![NPM Downloads](https://img.shields.io/npm/dm/gab-astro-compress?logo=npm)](https://www.npmjs.com/package/gab-astro-compress) <!-- [![NPM Downloads](https://img.shields.io/npm/dt/gab-astro-compress?logo=npm)](https://www.npmjs.com/package/gab-astro-compress) -->
+![NPM Version](https://img.shields.io/npm/v/gab-astro-compress/latest?logo=npm)
+
+
+
 # AstroCompress
 
 A powerful compression integration for static assets in Astro. This package automatically optimizes and compresses various file types including images, HTML, JavaScript, CSS, and SVG files during the build process.
@@ -129,13 +134,6 @@ The integration includes a caching system that stores compressed versions of fil
 - Stylesheets: `.css`
 - Vector Graphics: `.svg`
 
-## License
-
-MIT
-
-## Acknowledgments
-
-This is a fork of [mysong-compress](https://github.com/mysongstudio/mysong-compress), thanks for the original creator [@mysongstudio](https://github.com/mysongstudio) !
 
 ## Contributing
 
@@ -144,3 +142,11 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Issues
 
 If you find a bug or want to request a new feature, please open an issue on GitHub.
+
+## Acknowledgments
+
+This is a fork of [mysong-compress](https://github.com/mysongstudio/mysong-compress), thanks for the original creator [@mysongstudio](https://github.com/mysongstudio) !
+
+## License
+
+MIT
