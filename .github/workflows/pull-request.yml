@@ -7,7 +7,7 @@ on: [pull_request]
 
 jobs:
   build:
-
+    name: Tests passing
     runs-on: ubuntu-latest
 
     strategy:
