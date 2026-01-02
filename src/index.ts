@@ -8,6 +8,7 @@ import * as path from 'path';
 import sharp from 'sharp';
 import { optimize } from 'svgo';
 import { minify as terserMinify } from 'terser';
+import { fileURLToPath } from 'url';
 import { CompressionCacheManagerImpl } from './CompressionCache.js';
 import { defaultCacheDir, defaultConfig } from './defaultConfig.js';
 import { traverseDirectory } from './helpers.js';
@@ -37,6 +38,23 @@ function getAliasForExtension(extension: string) {
             return key as keyof typeof configAliases;
         }
     }
+}
+
+/**
+ * Helper function to read file with retry for Windows file locking issues.
+ * On Windows, files may still be locked from previous operations.
+ */
+async function readFileWithRetry(file: string, logger: AstroIntegrationLogger, maxRetries = 5, delayMs = 50): Promise<Buffer> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            return fs.readFileSync(file);
+        } catch (err) {
+            if (attempt === maxRetries) throw err;
+            logger.debug(`File read attempt ${attempt} failed for ${file}, retrying in ${delayMs * attempt}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delayMs * attempt));
+        }
+    }
+    throw new Error(`Failed to read file after ${maxRetries} attempts: ${file}`);
 }
 
 export default function GabAstroCompress(options: CompressOptions = {}): AstroIntegration {
@@ -109,7 +127,11 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
 
         try {
             if (/\.(jpe?g|png|webp|tiff?|avif|heif)$/i.test(filePath)) {
-                let pipeline = sharp(filePath);
+                // Read file into buffer first to avoid Windows file locking issues.
+                // Sharp opens files lazily during metadata() and toBuffer() calls,
+                // which can conflict with readFileSync on Windows.
+                const fileBuffer = await readFileWithRetry(filePath, logger);
+                let pipeline = sharp(fileBuffer);
                 const format = (await pipeline.metadata()).format;
                 const compression = (await pipeline.metadata()).compression;
                 logger.debug("Format: " + format);
@@ -199,7 +221,9 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
 
                 if (compressionConfig.cache?.enabled) {
                     cacheManager = new CompressionCacheManagerImpl(
-                        path.join(config.root.pathname, compressionConfig.cache?.cacheDir || defaultCacheDir),
+                        // Use fileURLToPath for Windows compatibility.
+                        // URL.pathname on Windows produces invalid paths like /C:/Users/...
+                        path.join(fileURLToPath(config.root), compressionConfig.cache?.cacheDir || defaultCacheDir),
                         logger
                     );
                     await cacheManager.initialize();
@@ -210,10 +234,12 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
             },
             'astro:build:done': async ({ assets, dir, logger }) => {
                 const candidates = await traverseDirectory(dir);
+                // Use fileURLToPath for Windows compatibility
+                const dirPath = fileURLToPath(dir);
                 let promises: Promise<any>[] = [];
 
                 for (const candidate of candidates) {
-                    const candidatePrettyPath = candidate.replace(dir.pathname, '');
+                    const candidatePrettyPath = candidate.replace(dirPath, '');
 
                     if (compressionConfig.cache?.enabled) {
                         const originalContent = fs.readFileSync(candidate);
@@ -277,4 +303,3 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
         },
     } as AstroIntegration;
 }
-
