@@ -11,7 +11,7 @@ import { minify as terserMinify } from 'terser';
 import { fileURLToPath } from 'url';
 import { CompressionCacheManagerImpl } from './CompressionCache.js';
 import { defaultCacheDir, defaultConfig } from './defaultConfig.js';
-import { traverseDirectory } from './helpers.js';
+import { readFileSyncWithRetry, traverseDirectory } from './helpers.js';
 import type { CompressOptions, FormatCompressionOptions, UsedFormatConfig } from './types.js';
 
 const enum KnowFailReason {
@@ -38,23 +38,6 @@ function getAliasForExtension(extension: string) {
             return key as keyof typeof configAliases;
         }
     }
-}
-
-/**
- * Helper function to read file with retry for Windows file locking issues.
- * On Windows, files may still be locked from previous operations.
- */
-async function readFileWithRetry(file: string, logger: AstroIntegrationLogger, maxRetries = 5, delayMs = 50): Promise<Buffer> {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        try {
-            return fs.readFileSync(file);
-        } catch (err) {
-            if (attempt === maxRetries) throw err;
-            logger.debug(`File read attempt ${attempt} failed for ${file}, retrying in ${delayMs * attempt}ms...`);
-            await new Promise(resolve => setTimeout(resolve, delayMs * attempt));
-        }
-    }
-    throw new Error(`Failed to read file after ${maxRetries} attempts: ${file}`);
 }
 
 export default function GabAstroCompress(options: CompressOptions = {}): AstroIntegration {
@@ -130,7 +113,7 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
                 // Read file into buffer first to avoid Windows file locking issues.
                 // Sharp opens files lazily during metadata() and toBuffer() calls,
                 // which can conflict with readFileSync on Windows.
-                const fileBuffer = await readFileWithRetry(filePath, logger);
+                const fileBuffer = await readFileSyncWithRetry(filePath, logger);
                 let pipeline = sharp(fileBuffer);
                 const format = (await pipeline.metadata()).format;
                 const compression = (await pipeline.metadata()).compression;
@@ -221,8 +204,6 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
 
                 if (compressionConfig.cache?.enabled) {
                     cacheManager = new CompressionCacheManagerImpl(
-                        // Use fileURLToPath for Windows compatibility.
-                        // URL.pathname on Windows produces invalid paths like /C:/Users/...
                         path.join(fileURLToPath(config.root), compressionConfig.cache?.cacheDir || defaultCacheDir),
                         logger
                     );
@@ -234,7 +215,6 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
             },
             'astro:build:done': async ({ assets, dir, logger }) => {
                 const candidates = await traverseDirectory(dir);
-                // Use fileURLToPath for Windows compatibility
                 const dirPath = fileURLToPath(dir);
                 let promises: Promise<any>[] = [];
 
