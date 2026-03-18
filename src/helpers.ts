@@ -28,7 +28,7 @@ export async function traverseDirectory(directory: URL) {
  * Helper function to read file with retry for Windows file locking issues.
  * On Windows, files may still be locked from previous operations.
  */
-export async function readFileSyncWithRetry(file: string, logger: AstroIntegrationLogger, maxRetries = 5, delayMs = 50): Promise<Buffer> {
+export async function readFileSyncWithRetry(file: string, maxRetries = 5, delayMs = 50): Promise<Buffer> {
   let readFileErr;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {

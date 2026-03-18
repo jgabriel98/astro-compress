@@ -113,7 +113,7 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
                 // Read file into buffer first to avoid Windows file locking issues.
                 // Sharp opens files lazily during metadata() and toBuffer() calls,
                 // which can conflict with readFileSync on Windows.
-                const fileBuffer = await readFileSyncWithRetry(filePath, logger);
+                const fileBuffer = await readFileSyncWithRetry(filePath);
                 let pipeline = sharp(fileBuffer);
                 const format = (await pipeline.metadata()).format;
                 const compression = (await pipeline.metadata()).compression;
