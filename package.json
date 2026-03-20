@@ -9,7 +9,7 @@
     "performance",
     "tooling"
   ],
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Compression integration for static assets in astro, with caching.",
   "repository": {
     "type": "git",
