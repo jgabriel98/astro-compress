@@ -1,3 +1,4 @@
+import { type AstroIntegrationLogger } from 'astro';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -11,7 +12,7 @@ export async function setupTestFiles(tempDir: string, files: Record<string, Test
 }
 
 export async function setupTestFile(tempDir: string, fileInfo: TestFileConfig) {
-  await fs.mkdir(tempDir, { recursive: true });  
+  await fs.mkdir(tempDir, { recursive: true });
   const filePath = path.join(tempDir, fileInfo.name);
   await fs.writeFile(filePath, fileInfo.content);
   return filePath;
@@ -26,4 +27,18 @@ export async function compareFiles(file1: string, file2: string): Promise<boolea
   const content1 = await fs.readFile(file1);
   const content2 = await fs.readFile(file2);
   return Buffer.compare(content1, content2) === 0;
-} 
+}
+
+// Create mock logger
+export const mockLogger: AstroIntegrationLogger = {
+  info: () => { },
+  debug: () => { },
+  warn: () => { },
+  error: console.error,
+  fork: () => mockLogger,
+  label: 'gab-astro-compress',
+  options: {
+    dest: { write: (_: any) => true },
+    level: 'info',
+  }
+};

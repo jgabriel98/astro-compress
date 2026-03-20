@@ -1,10 +1,10 @@
-import type { AstroIntegrationLogger } from 'astro';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import sharp from 'sharp';
+import { pathToFileURL } from 'url';
 import { afterEach, beforeAll, describe, expect, test } from 'vitest';
 import gabAstroCompress from '../src/index';
-import { getFileSize, setupTestFile } from './helpers';
+import { getFileSize, mockLogger, setupTestFile } from './helpers';
 
 describe('Image Compression', async () => {
   let tempDir: string;
@@ -128,19 +128,6 @@ describe('Image Compression', async () => {
     }
   };
 
-  // Create mock logger
-  const mockLogger: AstroIntegrationLogger = {
-    info: () => { },
-    debug: () => { },
-    warn: () => { },
-    error: console.error,
-    fork: () => mockLogger,
-    label: 'gab-astro-compress',
-    options: {
-      level: 'info'
-    }
-  };
-
   beforeAll(async () => {
     // Create unique temp directory for this test suite
     tempDir = path.join(__dirname, 'fixtures', 'temp-image-' + Date.now());
@@ -152,64 +139,25 @@ describe('Image Compression', async () => {
     await fs.rm(tempDir, { recursive: true, force: true });
   });
 
-  const mockBuildData = {
-    pages: [{ pathname: '/index.html' }],
-    routes: [],
-    assets: new Map<string, URL[]>(),
-  };
-
   async function runCompression(compress: ReturnType<typeof gabAstroCompress>) {
     // First run config hook
     await compress.hooks['astro:config:done']?.({
+      // @ts-ignore
       config: {
-        root: new URL(`file://${tempDir}`),
-        srcDir: new URL(`file://${tempDir}`),
-        outDir: new URL(`file://${buildDir}`),
-        publicDir: new URL(`file://${tempDir}/public`),
-        base: '/',
-        integrations: [],
-        trailingSlash: 'never',
-        server: { host: true, port: 3000, open: false },
-        redirects: {},
-        adapter: undefined,
-        image: {
-          service: { entrypoint: 'astro/assets/services/sharp', config: {} },
-          domains: [],
-          remotePatterns: []
-        },
-        markdown: {
-          syntaxHighlight: 'shiki',
-          shikiConfig: { langs: [], theme: 'github-dark', wrap: false },
-          remarkPlugins: [],
-          rehypePlugins: [],
-          remarkRehype: {},
-          gfm: true,
-          smartypants: true,
-        },
-        vite: {},
-        compressHTML: true,
-        build: {
-          format: 'directory',
-          client: new URL(`file://${tempDir}/dist/client`),
-          server: new URL(`file://${tempDir}/dist/server`),
-          assets: 'assets',
-          serverEntry: 'entry.mjs',
-          redirects: true,
-          inlineStylesheets: 'auto',
-          concurrency: 5
-        },
-        site: 'http://localhost:3000',
-        style: { postcss: { options: {}, plugins: [] } },
-        scopedStyleStrategy: 'attribute'
+        root: pathToFileURL(tempDir),
+        srcDir: pathToFileURL(tempDir),
+        outDir: pathToFileURL(buildDir),
+        publicDir: pathToFileURL(`${tempDir}/public`),
       },
       logger: mockLogger,
-      updateConfig: (config) => config,
     });
 
     // Then run build hook
     await compress.hooks['astro:build:done']?.({
-      ...mockBuildData,
-      dir: new URL(`file://${buildDir}`),
+      dir: pathToFileURL(buildDir),
+      pages: [{ pathname: '/index.html' }],
+      routes: [],
+      assets: new Map(),
       logger: mockLogger,
     });
   }

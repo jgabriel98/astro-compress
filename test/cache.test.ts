@@ -1,14 +1,14 @@
-import type { AstroIntegrationLogger } from 'astro';
+import { createHash } from 'crypto';
 import { existsSync } from 'fs';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { pathToFileURL } from 'url';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { CompressionCacheManagerImpl } from '../src/CompressionCache';
 import { defaultCacheDir, defaultConfig } from '../src/defaultConfig';
 import gabAstroCompress from '../src/index';
-import { setupTestFile, setupTestFiles } from './helpers';
-import { createHash } from 'crypto';
 import { ValueOf } from '../src/types';
+import { mockLogger, setupTestFile, setupTestFiles } from './helpers';
 
 describe('Cache System', () => {
   let tempDir: string;
@@ -41,22 +41,6 @@ describe('Cache System', () => {
     return createHash('sha256').update(testFile.content).digest('hex');
   }
 
-  // Create mock logger
-  const mockLogger: AstroIntegrationLogger = {
-    info: console.log,
-    debug: console.log,
-    warn: console.log,
-    error: console.error,
-    fork: () => mockLogger,
-    label: 'gab-astro-compress',
-    options: {
-      dest: {
-        write: () => true
-      },
-      level: 'info'
-    }
-  };
-
   // beforeAll(async () => {
   //   await setupTestFiles(tempDir, TEST_FILES);
   // });
@@ -72,59 +56,18 @@ describe('Cache System', () => {
 
   async function runCompression(compress: ReturnType<typeof gabAstroCompress>) {
     await compress.hooks['astro:config:done']?.({
+      // @ts-ignore
       config: {
-        root: new URL(`file://${tempDir}`),
-        srcDir: new URL(`file://${tempDir}`),
-        outDir: new URL(`file://${buildDir}`),
-        publicDir: new URL(`file://${tempDir}/public`),
-        base: '/',
-        integrations: [],
-        trailingSlash: 'never',
-        server: { host: true, port: 3000, open: false },
-        redirects: {},
-        adapter: undefined,
-        image: {
-          service: { entrypoint: 'astro/assets/services/sharp', config: {} },
-          domains: [],
-          remotePatterns: [],
-          endpoint: { route: '/image-endpoint', entrypoint: 'astro/assets/endpoint/node' }
-        },
-        markdown: {
-          syntaxHighlight: 'shiki',
-          shikiConfig: {
-            langs: [],
-            theme: 'github-dark',
-            wrap: false,
-            themes: {},
-            langAlias: {},
-            transformers: []
-          },
-          remarkPlugins: [],
-          rehypePlugins: [],
-          remarkRehype: {},
-          gfm: true,
-          smartypants: true
-        },
-        vite: {},
-        compressHTML: true,
-        build: {
-          format: 'directory',
-          client: new URL(`file://${tempDir}/dist/client`),
-          server: new URL(`file://${tempDir}/dist/server`),
-          assets: 'assets',
-          serverEntry: 'entry.mjs',
-          redirects: true,
-          inlineStylesheets: 'auto',
-          concurrency: 5
-        },
-        site: 'http://localhost:3000'
+        root: pathToFileURL(tempDir),
+        srcDir: pathToFileURL(tempDir),
+        outDir: pathToFileURL(buildDir),
+        publicDir: pathToFileURL(`${tempDir}/public`),
       },
       logger: mockLogger,
-      updateConfig: (config) => config,
     });
 
     await compress.hooks['astro:build:done']?.({
-      dir: new URL(`file://${buildDir}`),
+      dir: pathToFileURL(buildDir),
       pages: [{ pathname: '/index.html' }],
       routes: [],
       assets: new Map(),
