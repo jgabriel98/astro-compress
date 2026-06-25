@@ -1,11 +1,23 @@
-import type { CompressOptions as CssoCompressOptions, MinifyOptions as CssoMinifyOptions } from "csso";
-import type { Options as HtmlMinifierOptions } from "html-minifier-terser";
-import type { AvifOptions, HeifOptions, JpegOptions, PngOptions, TiffOptions, WebpOptions, GifOptions, JxlOptions } from "sharp";
-import type { Config as SvgoConfig } from "svgo";
-import type { MinifyOptions } from "terser";
+import type {
+  CompressOptions as CssoCompressOptions,
+  MinifyOptions as CssoMinifyOptions,
+} from 'csso';
+import type { Options as HtmlMinifierOptions } from 'html-minifier-terser';
+import type {
+  AvifOptions,
+  HeifOptions,
+  JpegOptions,
+  PngOptions,
+  TiffOptions,
+  WebpOptions,
+  GifOptions,
+  JxlOptions,
+} from 'sharp';
+import type { Config as SvgoConfig } from 'svgo';
+import type { MinifyOptions } from 'terser';
 
 export interface FormatCompressionOptions {
-  png?: PngOptions
+  png?: PngOptions;
   jpeg?: JpegOptions;
   jxl?: JxlOptions;
   webp?: WebpOptions;
@@ -22,7 +34,7 @@ export interface CompressOptions extends FormatCompressionOptions {
   cache?: {
     enabled: boolean;
     cacheDir?: string;
-  }
+  };
 }
 
 export type UsedFormatConfig = {
@@ -30,6 +42,6 @@ export type UsedFormatConfig = {
   format: string;
 } | null;
 
-export type ValueOf<T> = T[keyof T]
+export type ValueOf<T> = T[keyof T];
 
 export type SetValueType<T> = T extends Set<infer U> ? U : never;

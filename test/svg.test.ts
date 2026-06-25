@@ -21,7 +21,7 @@ describe('SVG Compression', () => {
                   stroke-width="3" 
                   fill="red"/>
         </svg>
-      `
+      `,
     },
     withPaths: {
       name: 'paths.svg',
@@ -35,8 +35,8 @@ describe('SVG Compression', () => {
           <path d="M 20,20 L 80,20 L 80,80 L 20,80 Z" 
                 fill="yellow"/>
         </svg>
-      `
-    }
+      `,
+    },
   };
 
   beforeAll(async () => {
@@ -76,7 +76,7 @@ describe('SVG Compression', () => {
     const originalSize = await getFileSize(filePath);
 
     const compress = gabAstroCompress({
-      svg: { multipass: true }
+      svg: { multipass: true },
     });
 
     await runCompression(compress);
@@ -101,7 +101,7 @@ describe('SVG Compression', () => {
     const originalSize = await getFileSize(filePath);
 
     const compress = gabAstroCompress({
-      svg: { multipass: true }
+      svg: { multipass: true },
     });
 
     await runCompression(compress);
@@ -116,7 +116,7 @@ describe('SVG Compression', () => {
     expect(compressedContent).toMatch(/<path[^>]+d="[^"]+"/);
 
     // Verify essential attributes are preserved (using hex color codes)
-    expect(compressedContent).toMatch(/fill="#ff0"/);  // yellow in hex
+    expect(compressedContent).toMatch(/fill="#ff0"/); // yellow in hex
     expect(compressedContent).toMatch(/stroke="#00f"/); // blue in hex
   });
 
@@ -129,7 +129,7 @@ describe('SVG Compression', () => {
           <unclosed-element>
           <invalid-tag>
           <!-- Unclosed comment
-      `
+      `,
     };
 
     const filePath = await setupTestFile(buildDir, malformedSVG);
@@ -141,10 +141,13 @@ describe('SVG Compression', () => {
     await runCompression(compress);
 
     // Original file should still exist and be unchanged
-    const exists = await fs.access(filePath).then(() => true).catch(() => false);
+    const exists = await fs
+      .access(filePath)
+      .then(() => true)
+      .catch(() => false);
     expect(exists).toBe(true);
 
     const finalContent = await fs.readFile(filePath, 'utf-8');
     expect(finalContent).toBe(originalContent);
   });
-}); 
+});

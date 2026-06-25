@@ -23,7 +23,7 @@ describe('Cache System', () => {
           color: #ffffff;
           background-color: #000000;
         }
-      `
+      `,
     },
     js: {
       name: 'script.js',
@@ -33,8 +33,8 @@ describe('Cache System', () => {
           const x = "hello";
           console.log(x);
         }
-      `
-    }
+      `,
+    },
   };
 
   function getHash(testFile: ValueOf<typeof TEST_FILES>) {
@@ -89,7 +89,6 @@ describe('Cache System', () => {
     const firstRunCssStats = await fs.stat(cssPath);
     const firstRunJsStats = await fs.stat(jsPath);
 
-
     expect(firstRunCssStats.mtimeMs).not.toBe(beforeRunCssStats.mtimeMs);
     expect(firstRunJsStats.mtimeMs).not.toBe(beforeRunJsStats.mtimeMs);
 
@@ -107,8 +106,7 @@ describe('Cache System', () => {
 
   test('should recreate cache when file content changes', async () => {
     const cssPath = await setupTestFile(buildDir, TEST_FILES.css);
-    const cacheManager = new CompressionCacheManagerImpl(path.join(tempDir, defaultCacheDir))
-
+    const cacheManager = new CompressionCacheManagerImpl(path.join(tempDir, defaultCacheDir));
 
     // First compression run
     const compress = gabAstroCompress();
@@ -116,9 +114,9 @@ describe('Cache System', () => {
 
     await cacheManager.loadManifest();
     const firstRunCacheEntry = await cacheManager.getCachedFile(cssPath, getHash(TEST_FILES.css), {
-      "config": {},
-      "format": "css"
-    })
+      config: {},
+      format: 'css',
+    });
     const firstRunContent = await fs.readFile(firstRunCacheEntry!.compressedPath);
 
     // Modify file
@@ -129,16 +127,17 @@ describe('Cache System', () => {
         padding: 30px;
         color: #cccccc;
       }
-    `}
+    `,
+    };
     await setupTestFile(buildDir, newCssFile);
 
     // Second compression run
     await runCompression(compress);
     await cacheManager.loadManifest();
     const secondRunCacheEntry = await cacheManager.getCachedFile(cssPath, getHash(newCssFile), {
-      "config": {},
-      "format": "css"
-    })
+      config: {},
+      format: 'css',
+    });
     const secondRunContent = await fs.readFile(secondRunCacheEntry!.compressedPath);
 
     // File should be modified in second run (different mtime)
@@ -148,7 +147,7 @@ describe('Cache System', () => {
 
   test('should invalidate cache when file content changes', async () => {
     const cssPath = await setupTestFile(buildDir, TEST_FILES.css);
-    const cacheManager = new CompressionCacheManagerImpl(path.join(tempDir, defaultCacheDir))
+    const cacheManager = new CompressionCacheManagerImpl(path.join(tempDir, defaultCacheDir));
 
     // First compression run
     const compress = gabAstroCompress();
@@ -156,9 +155,9 @@ describe('Cache System', () => {
 
     await cacheManager.loadManifest();
     let firstRunCacheEntry = await cacheManager.getCachedFile(cssPath, getHash(TEST_FILES.css), {
-      "config": {},
-      "format": "css"
-    })
+      config: {},
+      format: 'css',
+    });
     const firstRunContent = await fs.readFile(firstRunCacheEntry!.compressedPath);
 
     expect(firstRunCacheEntry).not.toBeNull();
@@ -172,16 +171,17 @@ describe('Cache System', () => {
         padding: 30px;
         color: #cccccc;
       }
-    `}
+    `,
+    };
     await setupTestFile(buildDir, newCssFile);
 
     // Second compression run
     await runCompression(compress);
     await cacheManager.loadManifest();
     const secondRunCacheEntry = await cacheManager.getCachedFile(cssPath, getHash(newCssFile), {
-      "config": {},
-      "format": "css"
-    })
+      config: {},
+      format: 'css',
+    });
     const secondRunContent = await fs.readFile(secondRunCacheEntry!.compressedPath);
     const firstRunContentStillExists = existsSync(firstRunCacheEntry!.compressedPath);
 
@@ -193,7 +193,7 @@ describe('Cache System', () => {
 
   test('should recreate cache when compression settings change', async () => {
     const jsPath = await setupTestFile(buildDir, TEST_FILES.js);
-    const cacheManager = new CompressionCacheManagerImpl(path.join(tempDir, defaultCacheDir))
+    const cacheManager = new CompressionCacheManagerImpl(path.join(tempDir, defaultCacheDir));
     await cacheManager.initialize();
 
     // const originalContent = await fs.readFile(jsPath);
@@ -204,9 +204,9 @@ describe('Cache System', () => {
 
     await cacheManager.loadManifest();
     const firstRunCacheEntry = await cacheManager.getCachedFile(jsPath, getHash(TEST_FILES.js), {
-      "config": defaultConfig.js,
-      "format": "js"
-    })
+      config: defaultConfig.js,
+      format: 'js',
+    });
 
     expect(firstRunCacheEntry).not.toBeNull();
 
@@ -215,18 +215,18 @@ describe('Cache System', () => {
     const compress2 = gabAstroCompress({
       js: {
         compress: true,
-        mangle: false  // Different from default
-      }
+        mangle: false, // Different from default
+      },
     });
     await runCompression(compress2);
     await cacheManager.loadManifest();
     const secondRunCacheEntry = await cacheManager.getCachedFile(jsPath, getHash(TEST_FILES.js), {
-      "config": {
+      config: {
         compress: true,
-        mangle: false  // Different from default
+        mangle: false, // Different from default
       },
-      "format": "js"
-    })
+      format: 'js',
+    });
 
     expect(secondRunCacheEntry).not.toBeNull();
     // File should be modified in second run (different mtime)
@@ -235,7 +235,7 @@ describe('Cache System', () => {
 
   test('should invalidate cache when compression settings change', async () => {
     const jsPath = await setupTestFile(buildDir, TEST_FILES.js);
-    const cacheManager = new CompressionCacheManagerImpl(path.join(tempDir, defaultCacheDir))
+    const cacheManager = new CompressionCacheManagerImpl(path.join(tempDir, defaultCacheDir));
     await cacheManager.initialize();
 
     // First compression run with default settings
@@ -244,9 +244,9 @@ describe('Cache System', () => {
 
     await cacheManager.loadManifest();
     let firstRunCacheEntry = await cacheManager.getCachedFile(jsPath, getHash(TEST_FILES.js), {
-      "config": defaultConfig.js,
-      "format": "js"
-    })
+      config: defaultConfig.js,
+      format: 'js',
+    });
     let compressedContent = await fs.readFile(firstRunCacheEntry!.compressedPath);
 
     expect(firstRunCacheEntry).not.toBeNull();
@@ -257,25 +257,25 @@ describe('Cache System', () => {
     const compress2 = gabAstroCompress({
       js: {
         compress: true,
-        mangle: false  // Different from default
-      }
+        mangle: false, // Different from default
+      },
     });
     await runCompression(compress2);
 
     await cacheManager.loadManifest();
     const secondRunCacheEntry = await cacheManager.getCachedFile(jsPath, getHash(TEST_FILES.js), {
-      "config": {
+      config: {
         compress: true,
-        mangle: false  // Different from default
+        mangle: false, // Different from default
       },
-      "format": "js"
-    })
+      format: 'js',
+    });
     compressedContent = await fs.readFile(secondRunCacheEntry!.compressedPath);
 
     firstRunCacheEntry = await cacheManager.getCachedFile(jsPath, getHash(TEST_FILES.js), {
-      "config": defaultConfig.js,
-      "format": "js"
-    })
+      config: defaultConfig.js,
+      format: 'js',
+    });
 
     expect(compressedContent).not.toBeNull();
     // cache entry should not exist anymore
@@ -292,11 +292,15 @@ describe('Cache System', () => {
     await runCompression(compress);
 
     // Cache directory should be created
-    const cacheDirExists = await fs.access(cacheDir).then(() => true).catch(() => false);
+    const cacheDirExists = await fs
+      .access(cacheDir)
+      .then(() => true)
+      .catch(() => false);
     expect(cacheDirExists).toBe(true);
 
     // Cache manifest should exist
-    const manifestExists = await fs.access(path.join(cacheDir, 'manifest.json'))
+    const manifestExists = await fs
+      .access(path.join(cacheDir, 'manifest.json'))
       .then(() => true)
       .catch(() => false);
     expect(manifestExists).toBe(true);
@@ -309,13 +313,16 @@ describe('Cache System', () => {
     // Run compression with cache disabled
     const compress = gabAstroCompress({
       cache: {
-        enabled: false
-      }
+        enabled: false,
+      },
     });
     await runCompression(compress);
 
     // Cache directory should not be created
-    const cacheDirExists = await fs.access(cacheDir).then(() => true).catch(() => false);
+    const cacheDirExists = await fs
+      .access(cacheDir)
+      .then(() => true)
+      .catch(() => false);
     expect(cacheDirExists).toBe(false);
   });
 
@@ -327,25 +334,29 @@ describe('Cache System', () => {
     const absoluteCustomCacheDir = path.join(tempDir, customCacheDir);
     try {
       await fs.rm(absoluteCustomCacheDir, { recursive: true });
-    } catch { }
+    } catch {}
 
     // Run compression with custom cache directory
     const compress = gabAstroCompress({
       cache: {
         enabled: true,
-        cacheDir: customCacheDir
-      }
+        cacheDir: customCacheDir,
+      },
     });
     await runCompression(compress);
 
     // Custom cache directory should be created
-    const customCacheDirExists = await fs.access(absoluteCustomCacheDir).then(() => true).catch(() => false);
+    const customCacheDirExists = await fs
+      .access(absoluteCustomCacheDir)
+      .then(() => true)
+      .catch(() => false);
     expect(customCacheDirExists).toBe(true);
 
     // Custom cache manifest should exist
-    const customManifestExists = await fs.access(path.join(absoluteCustomCacheDir, 'manifest.json'))
+    const customManifestExists = await fs
+      .access(path.join(absoluteCustomCacheDir, 'manifest.json'))
       .then(() => true)
       .catch(() => false);
     expect(customManifestExists).toBe(true);
   });
-}); 
+});

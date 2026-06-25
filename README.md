@@ -1,8 +1,6 @@
 [![NPM Downloads](https://img.shields.io/npm/dm/gab-astro-compress?logo=npm)](https://www.npmjs.com/package/gab-astro-compress) <!-- [![NPM Downloads](https://img.shields.io/npm/dt/gab-astro-compress?logo=npm)](https://www.npmjs.com/package/gab-astro-compress) -->
 ![NPM Version](https://img.shields.io/npm/v/gab-astro-compress/latest?logo=npm)
 
-
-
 # AstroCompress
 
 A powerful compression integration for static assets in Astro. This package automatically optimizes and compresses various file types including images, HTML, JavaScript, CSS, and SVG files during the build process.
@@ -19,7 +17,7 @@ This integraton is inspired by [astro-compress](https://github.com/withastro/ast
 - 💾 Caching system for faster builds
 - ⚙️ Highly configurable compression settings
 
-## Installation 
+## Installation
 
 ```bash
 npm install gab-astro-compress
@@ -38,22 +36,22 @@ export default defineConfig({
   integrations: [
     astroCompress({
       // optional configuration
-    })
-  ]
+    }),
+  ],
 });
 ```
 
 > **Note:** gab-astro-compress hooks into the Astro `astro:build:done` hook. It is called when the static assets are finished. Add gab-astro-compress as the last integration for best results. This way it can also optimize the output of other integrations.
-	
+
 ## Configuration
 
 You can customize the compression settings for different file types.
 
-* The compression for `png`, `jpeg`, `jxl`, `webp`, `avif`, `heif`, `gif` and `tiff` is handled by [sharp](https://sharp.pixelplumbing.com/api-output#png). The gab-astro-compress integration wraps the corresponding sharp options, so that you have full control over the compression process.
-* The compression for `html` is handled by [html-minifier-terser](https://github.com/terser/html-minifier-terser?tab=readme-ov-file#options-quick-reference). The gab-astro-compress integration wraps the corresponding html-minifier-terser options, so that you have full control over the compression process.
-* The compression for `js` is handled by [terser](https://terser.org/docs/api-reference#minify-options). The gab-astro-compress integration wraps the corresponding terser options, so that you have full control over the compression process.
-* The compression for `svg` is handled by [svgo](https://github.com/svg/svgo?tab=readme-ov-file#configuration). 
-* The compression for `css` is handled by [csso](https://github.com/css/csso). 
+- The compression for `png`, `jpeg`, `jxl`, `webp`, `avif`, `heif`, `gif` and `tiff` is handled by [sharp](https://sharp.pixelplumbing.com/api-output#png). The gab-astro-compress integration wraps the corresponding sharp options, so that you have full control over the compression process.
+- The compression for `html` is handled by [html-minifier-terser](https://github.com/terser/html-minifier-terser?tab=readme-ov-file#options-quick-reference). The gab-astro-compress integration wraps the corresponding html-minifier-terser options, so that you have full control over the compression process.
+- The compression for `js` is handled by [terser](https://terser.org/docs/api-reference#minify-options). The gab-astro-compress integration wraps the corresponding terser options, so that you have full control over the compression process.
+- The compression for `svg` is handled by [svgo](https://github.com/svg/svgo?tab=readme-ov-file#configuration).
+- The compression for `css` is handled by [csso](https://github.com/css/csso).
 
 The astro-compress integration wraps the corresponding tool options, so that you have full control over the compression process.
 
@@ -61,54 +59,53 @@ Below you can find the default configuration for each file type. The effort para
 
 ```ts
 export const defaultConfig: CompressOptions = {
-    cache: {
-        enabled: true,
-        cacheDir: 'node_modules/.astro/.gab-astro-compress'
-    },
-    png: {
-        compressionLevel: 9.0,
-        palette: true
-    },
-    jpeg: {
-        mozjpeg: true,
-        trellisQuantisation: true,
-        overshootDeringing: true,
-        optimizeScans: true,
-    },
-    jxl : {
-        effort: 9.0,
-    },
-    webp: {
-        effort: 6.0,
-    },
-    avif: {
-        effort: 9.0,
-    },
-    heif: {
-        effort: 9.0,
-    },
-    tiff: {},
-    gif: {
-        effort: 6.0,
-    },
-    html: {
-        collapseWhitespace: true,
-        removeComments: true,
-        minifyCSS: true,
-        minifyJS: true,
-        continueOnParseError: true
-    },
-    js: {
-        compress: true,
-        mangle: true,
-    },
-    svg: {
-        multipass: true,
-    },
-    css: {}
+  cache: {
+    enabled: true,
+    cacheDir: 'node_modules/.astro/.gab-astro-compress',
+  },
+  png: {
+    compressionLevel: 9.0,
+    palette: true,
+  },
+  jpeg: {
+    mozjpeg: true,
+    trellisQuantisation: true,
+    overshootDeringing: true,
+    optimizeScans: true,
+  },
+  jxl: {
+    effort: 9.0,
+  },
+  webp: {
+    effort: 6.0,
+  },
+  avif: {
+    effort: 9.0,
+  },
+  heif: {
+    effort: 9.0,
+  },
+  tiff: {},
+  gif: {
+    effort: 6.0,
+  },
+  html: {
+    collapseWhitespace: true,
+    removeComments: true,
+    minifyCSS: true,
+    minifyJS: true,
+    continueOnParseError: true,
+  },
+  js: {
+    compress: true,
+    mangle: true,
+  },
+  svg: {
+    multipass: true,
+  },
+  css: {},
 };
 ```
-
 
 ## Default Configuration
 
@@ -133,7 +130,6 @@ The integration includes a caching system that stores compressed versions of fil
 - JavaScript: `.js`, `.cjs`, `.mjs`
 - Stylesheets: `.css`
 - Vector Graphics: `.svg`
-
 
 ## Contributing
 

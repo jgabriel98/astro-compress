@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, test } from 'vitest';
 
 describe('gab-astro-compress', () => {
   let tempDir: string;
-  
+
   beforeEach(async () => {
     // Set up temporary test directory
     tempDir = await fs.mkdtemp('gab-astro-compress-test-');
@@ -64,4 +64,4 @@ describe('gab-astro-compress', () => {
       // Test invalid config handling
     });
   });
-}); 
+});

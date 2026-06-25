@@ -29,7 +29,7 @@ describe('HTML Minification', () => {
             </div>
           </body>
         </html>
-      `
+      `,
     },
     withInlineAssets: {
       name: 'with-assets.html',
@@ -54,8 +54,8 @@ describe('HTML Minification', () => {
             </script>
           </body>
         </html>
-      `
-    }
+      `,
+    },
   };
 
   beforeAll(async () => {
@@ -120,7 +120,9 @@ describe('HTML Minification', () => {
     // Check that multiple spaces are collapsed
     expect(compressedContent).not.toMatch(/\s{2,}/);
     // Verify that text content is unchanged
-    expect(compressedContent).toContain('This is a test paragraph with multiple lines and extra spaces');
+    expect(compressedContent).toContain(
+      'This is a test paragraph with multiple lines and extra spaces',
+    );
   });
 
   test('should minify inline CSS and JavaScript', async () => {
@@ -130,8 +132,8 @@ describe('HTML Minification', () => {
     const compress = gabAstroCompress({
       html: {
         minifyCSS: true,
-        minifyJS: true
-      }
+        minifyJS: true,
+      },
     });
 
     await runCompression(compress);
@@ -140,7 +142,9 @@ describe('HTML Minification', () => {
     const compressedSize = await getFileSize(filePath);
 
     // Check that CSS is minified
-    expect(compressedContent).toContain('<style>.container{padding:20px 20px 20px 20px;color:#fff}</style></head>');
+    expect(compressedContent).toContain(
+      '<style>.container{padding:20px 20px 20px 20px;color:#fff}</style></head>',
+    );
     // Check that JS is minified and comments are removed
     expect(compressedContent).not.toContain('// This comment should be removed');
     expect(compressedContent).toContain('<script>function test(){console.log("hello")}</script>');
@@ -161,7 +165,7 @@ describe('HTML Minification', () => {
             <div>Unclosed div
             <p>Unclosed paragraph
             <!-- Unclosed comment
-      `
+      `,
     };
 
     const filePath = await setupTestFile(buildDir, malformedHTML);
@@ -175,4 +179,4 @@ describe('HTML Minification', () => {
     const compressedContent = await fs.readFile(filePath, 'utf-8');
     expect(compressedContent).toBeTruthy();
   });
-}); 
+});
