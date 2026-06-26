@@ -1,7 +1,3 @@
-import type {
-  CompressOptions as CssoCompressOptions,
-  MinifyOptions as CssoMinifyOptions,
-} from 'csso';
 import type { Options as HtmlMinifierOptions } from 'html-minifier-terser';
 import type {
   AvifOptions,
@@ -15,6 +11,11 @@ import type {
 } from 'sharp';
 import type { Config as SvgoConfig } from 'svgo';
 import type { MinifyOptions } from 'terser';
+import type { TransformOptions } from 'lightningcss';
+
+// Lightning CSS options excluding fields that are set at call time (code, filename, minify)
+// Using `any` for the CustomAtRules generic since we don't need custom at-rules for basic CSS minification
+export type LightningCssOptions = Omit<TransformOptions<any>, 'code' | 'filename' | 'minify'>;
 
 export interface FormatCompressionOptions {
   png?: PngOptions;
@@ -28,8 +29,9 @@ export interface FormatCompressionOptions {
   html?: HtmlMinifierOptions;
   js?: MinifyOptions;
   svg?: SvgoConfig;
-  css?: CssoMinifyOptions | CssoCompressOptions;
+  css?: LightningCssOptions;
 }
+
 export interface CompressOptions extends FormatCompressionOptions {
   cache?: {
     enabled: boolean;

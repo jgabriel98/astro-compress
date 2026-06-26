@@ -1,7 +1,7 @@
 import type { AstroConfig, AstroIntegration, AstroIntegrationLogger } from 'astro';
 import chalk from 'chalk';
 import { createHash } from 'crypto';
-import * as csso from 'csso';
+import { transform } from 'lightningcss';
 import * as fs from 'fs';
 import { minify } from 'html-minifier-terser';
 import * as path from 'path';
@@ -180,13 +180,25 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
         }
       } else if (/\.(css|scss|sass|less)$/i.test(filePath)) {
         const cssContent = fs.readFileSync(filePath, 'utf-8');
-        const minifyed = csso.minify(cssContent, compressionConfig.css);
 
-        if (minifyed.css) {
-          processingResult = handleCompressedResult(minifyed.css);
-        } else {
-          logger.error(`Failed to minify ${filePath}`);
-          processingResult = { processed: false, reason: KnowFailReason.NoOutput };
+        try {
+          const result = transform({
+            ...compressionConfig.css,
+            code: Buffer.from(cssContent),
+            filename: filePath,
+            minify: true,
+          });
+
+          // Convert Uint8Array to string
+          const minifiedCss = Buffer.from(result.code).toString('utf-8');
+          if (minifiedCss) {
+            processingResult = handleCompressedResult(minifiedCss);
+          } else {
+            logger.error(`Failed to minify ${filePath}`);
+            processingResult = { processed: false, reason: KnowFailReason.NoOutput };
+          }
+        } catch (cssError) {
+          return handleError(cssError, 'CSS minification');
         }
       } else {
         processingResult = { processed: false, reason: KnowFailReason.Skipped };

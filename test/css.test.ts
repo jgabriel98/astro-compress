@@ -44,6 +44,16 @@ describe('CSS Compression', () => {
         }
       `,
     },
+    withMediaQueryRange: {
+      name: 'media-query-range.css',
+      content: `
+        @media screen and (width >= 1200px) {
+          body {
+            background-color: yellow;
+          }
+        }
+      `,
+    },
   };
 
   beforeEach(async () => {
@@ -119,8 +129,23 @@ describe('CSS Compression', () => {
     expect(compressedContent).toContain('-moz-border-radius:10px');
     expect(compressedContent).toContain('border-radius:10px');
 
-    // Verify rgba color is compressed
-    expect(compressedContent).toContain('rgba(0,0,0,.5)');
+    // Verify color is optimized (Lightning CSS converts rgba to hex with alpha)
+    expect(compressedContent).toMatch(/rgba\(0,0,0,.5\)|#00000080/);
+  });
+
+  test('should handle CSS media query range syntax', async () => {
+    const filePath = path.join(buildDir, TEST_CSS.withMediaQueryRange.name);
+    const originalSize = await getFileSize(filePath);
+
+    const compress = gabAstroCompress();
+    await runCompression(compress);
+
+    const compressedContent = await fs.readFile(filePath, 'utf-8');
+    const compressedSize = await getFileSize(filePath);
+
+    expect(compressedSize).toBeLessThan(originalSize);
+    expect(compressedContent).toMatch(/@media screen and \((?:min-width:1200px|width>=1200px)\)/);
+    expect(compressedContent).toContain('body{background-color:#ff0}');
   });
 
   test('should handle malformed CSS gracefully', async () => {

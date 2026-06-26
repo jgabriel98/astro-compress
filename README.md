@@ -51,7 +51,7 @@ You can customize the compression settings for different file types.
 - The compression for `html` is handled by [html-minifier-terser](https://github.com/terser/html-minifier-terser?tab=readme-ov-file#options-quick-reference). The gab-astro-compress integration wraps the corresponding html-minifier-terser options, so that you have full control over the compression process.
 - The compression for `js` is handled by [terser](https://terser.org/docs/api-reference#minify-options). The gab-astro-compress integration wraps the corresponding terser options, so that you have full control over the compression process.
 - The compression for `svg` is handled by [svgo](https://github.com/svg/svgo?tab=readme-ov-file#configuration).
-- The compression for `css` is handled by [csso](https://github.com/css/csso).
+- The compression for `css` is handled by [Lightning CSS](https://lightningcss.dev/).
 
 The astro-compress integration wraps the corresponding tool options, so that you have full control over the compression process.
 
