@@ -44,6 +44,7 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
   const compressionConfig = {
     ...defaultConfig,
     ...options,
+    cache: { ...defaultConfig.cache, ...options.cache },
     png: { ...defaultConfig.png, ...options.png },
     jpeg: { ...defaultConfig.jpeg, ...options.jpeg },
     jxl: { ...defaultConfig.jxl, ...options.jxl },
@@ -55,6 +56,7 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
     html: { ...defaultConfig.html, ...options.html },
     js: { ...defaultConfig.js, ...options.js },
     svg: { ...defaultConfig.svg, ...options.svg },
+    css: { ...defaultConfig.css, ...options.css },
   } as const;
 
   let astroConfig: AstroConfig;
