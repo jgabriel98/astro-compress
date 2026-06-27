@@ -121,7 +121,7 @@ The integration includes a caching system that stores compressed versions of fil
 - **Cache Invalidation**: The cache is automatically invalidated when:
   - Source files change (detected via hash comparison).
   - Compression settings change (detected via settings comparison).
-  - **TODO**: Cache version changes (indicating a new version of the integration).
+  - Cache version changes (indicating a new version of the integration).
 
 ## File Types Supported
 

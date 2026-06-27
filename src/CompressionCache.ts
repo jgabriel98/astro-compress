@@ -6,6 +6,13 @@ import path from 'path';
 import { UsedFormatConfig } from './types';
 import chalk from 'chalk';
 
+/**
+ * Current cache manifest format version.
+ * Bump this value whenever the manifest structure changes in a way that
+ * makes old entries incompatible.
+ */
+export const MANIFEST_VERSION = '2';
+
 export interface CacheEntry {
   sourceHash: string; // Hash of original uncompressed file
   compressedPath: string; // Path to cached compressed version
@@ -47,7 +54,7 @@ export class CompressionCacheManagerImpl implements CompressionCacheManager {
 
   constructor(astroDir: string, logger?: AstroIntegrationLogger) {
     this.cacheDir = astroDir;
-    this.manifest = { version: '1', entries: {} };
+    this.manifest = { version: MANIFEST_VERSION, entries: {} };
     this.logger = logger;
   }
 
@@ -64,6 +71,14 @@ export class CompressionCacheManagerImpl implements CompressionCacheManager {
 
     try {
       await this.loadManifest();
+
+      if (this.manifest.version !== MANIFEST_VERSION) {
+        this.logger?.debug(
+          `Manifest version mismatch (found "${this.manifest.version}", expected "${MANIFEST_VERSION}"). Resetting cache.`,
+        );
+        this.manifest = { version: MANIFEST_VERSION, entries: {} };
+        this.saveManifest();
+      }
     } catch {
       this.logger?.debug('No existing cache manifest found, using default empty one.');
       this.saveManifest();

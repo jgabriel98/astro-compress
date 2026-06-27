@@ -1,11 +1,12 @@
 import { createHash } from 'crypto';
-import { existsSync } from 'fs';
+import { existsSync, writeFileSync } from 'fs';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { pathToFileURL } from 'url';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { CompressionCacheManagerImpl } from '../src/CompressionCache';
 import { defaultCacheDir, defaultConfig } from '../src/defaultConfig';
+import { MANIFEST_VERSION } from '../src/CompressionCache';
 import gabAstroCompress from '../src/index';
 import { ValueOf } from '../src/types';
 import { mockLogger, setupTestFile, setupTestFiles } from './helpers';
@@ -358,5 +359,86 @@ describe('Cache System', () => {
       .then(() => true)
       .catch(() => false);
     expect(customManifestExists).toBe(true);
+  });
+});
+
+describe('Cache manifest version invalidation', () => {
+  let tempDir: string;
+  let cacheDir: string;
+  let manifestPath: string;
+
+  beforeEach(async () => {
+    tempDir = path.join(__dirname, 'fixtures', 'temp-manifest-version-' + Date.now());
+    cacheDir = path.join(tempDir, 'cache');
+    manifestPath = path.join(cacheDir, 'manifest.json');
+    await fs.mkdir(cacheDir, { recursive: true });
+  });
+
+  afterEach(async () => {
+    await fs.rm(tempDir, { recursive: true, force: true });
+  });
+
+  test('should initialize a fresh manifest with the current MANIFEST_VERSION', async () => {
+    // No manifest file exists — first run scenario
+    const cacheManager = new CompressionCacheManagerImpl(cacheDir);
+    await cacheManager.initialize();
+
+    const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf-8'));
+    expect(manifest.version).toBe(MANIFEST_VERSION);
+    expect(manifest.entries).toEqual({});
+  });
+
+  test('should preserve a manifest that already has the current version', async () => {
+    // Pre-write a manifest with the current version and a fake entry
+    const fakeEntry = {
+      sourceHash: 'abc123',
+      compressedPath: '/some/cached/file.css',
+      timestamp: Date.now(),
+      settings: { config: {}, format: 'css' },
+      size: { original: 100, compressed: 80 },
+    };
+    writeFileSync(
+      manifestPath,
+      JSON.stringify({ version: MANIFEST_VERSION, entries: { '/src/style.css': fakeEntry } }),
+    );
+
+    const cacheManager = new CompressionCacheManagerImpl(cacheDir);
+    await cacheManager.initialize();
+
+    const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf-8'));
+    expect(manifest.version).toBe(MANIFEST_VERSION);
+    // Entries must NOT have been cleared
+    expect(manifest.entries).toHaveProperty('/src/style.css');
+  });
+
+  test('should reset manifest and clear entries when existing version is outdated', async () => {
+    // Simulate a stale cache from an older version of the plugin
+    const staleEntry = {
+      sourceHash: 'deadbeef',
+      compressedPath: '/some/old/cache/file.css',
+      timestamp: Date.now() - 10000,
+      settings: { config: {}, format: 'css' },
+      size: { original: 200, compressed: 150 },
+    };
+    writeFileSync(
+      manifestPath,
+      JSON.stringify({ version: '1', entries: { '/src/old-style.css': staleEntry } }),
+    );
+
+    const cacheManager = new CompressionCacheManagerImpl(cacheDir);
+    await cacheManager.initialize();
+
+    const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf-8'));
+    expect(manifest.version).toBe(MANIFEST_VERSION);
+    // All stale entries must have been wiped
+    expect(manifest.entries).toEqual({});
+  });
+
+  test('should use MANIFEST_VERSION by default', async () => {
+    const cacheManager = new CompressionCacheManagerImpl(cacheDir);
+    await cacheManager.initialize();
+
+    const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf-8'));
+    expect(manifest.version).toBe(MANIFEST_VERSION);
   });
 });
