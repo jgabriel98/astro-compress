@@ -115,7 +115,7 @@ If no configuration is provided, the integration will use optimal default settin
 
 The integration includes a caching system that stores compressed versions of files to speed up subsequent builds. Here's how it works:
 
-- **Cache Storage**: Compressed files are stored in a cache directory within the project's `node_modules/.astro/.cache/compress` folder.
+- **Cache Storage**: Compressed files are stored in a cache directory within the project's `node_modules/.astro/.gab-astro-compress` folder by default, or in the directory specified by `cache.cacheDir`.
 - **Cache Manifest**: A manifest file (`manifest.json`) keeps track of cached files, their original hashes, compression settings, and timestamps.
 - **Cache Retrieval**: Before compressing a file, the system checks if a cached version exists with the same original hash and settings. If found, the cached version is used.
 - **Cache Invalidation**: The cache is automatically invalidated when:
@@ -125,7 +125,7 @@ The integration includes a caching system that stores compressed versions of fil
 
 ## File Types Supported
 
-- Images: `.png`, `.jpg | .jpeg`, `.jxl`, `.webp`, `.avif`, `.heif`, `.gif`, `.tiff | .tif`)
+- Images: `.png`, `.jpg | .jpeg`, `.jxl`, `.webp`, `.avif`, `.heif`, `.gif`, `.tiff | .tif`
 - HTML: `.html`, `.htm`
 - JavaScript: `.js`, `.cjs`, `.mjs`
 - Stylesheets: `.css`
