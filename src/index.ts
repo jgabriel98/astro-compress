@@ -1,7 +1,8 @@
 import type { AstroConfig, AstroIntegration, AstroIntegrationLogger } from 'astro';
 import chalk from 'chalk';
 import { createHash } from 'crypto';
-import { transform } from 'lightningcss';
+import browserslist from 'browserslist';
+import { browserslistToTargets, transform } from 'lightningcss';
 import * as fs from 'fs';
 import { minify } from 'html-minifier-terser';
 import * as path from 'path';
@@ -58,6 +59,30 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
     svg: { ...defaultConfig.svg, ...options.svg },
     css: { ...defaultConfig.css, ...options.css },
   } as const;
+
+  // Lightning CSS options start
+  // Pre-resolve browserslist queries to Lightning CSS Targets
+  // once at startup, so it runs only once, not per file.
+  const { targets: cssTargetQueries, ...cssOptionsWithoutTargets } = compressionConfig.css ?? {};
+  const hasCssTargetQueries = cssTargetQueries && cssTargetQueries.length > 0;
+  let resolvedCssTargets: ReturnType<typeof browserslistToTargets> | undefined;
+  // Log error message for logger
+  let cssTargetsErrorMessage: string;
+
+  if (hasCssTargetQueries) {
+    try {
+      resolvedCssTargets = browserslistToTargets(browserslist(cssTargetQueries));
+    } catch (err) {
+      cssTargetsErrorMessage = `Invalid css.targets: "${cssTargetQueries}". CSS will be minified without browser-specific transforms.`;
+    }
+  }
+
+  const lightningCssOptions = {
+    ...cssOptionsWithoutTargets,
+    ...(resolvedCssTargets !== undefined ? { targets: resolvedCssTargets } : {}),
+    minify: true,
+  };
+  // Lightning CSS options end
 
   let astroConfig: AstroConfig;
   let originalSizeTotal = 0;
@@ -185,10 +210,9 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
 
         try {
           const result = transform({
-            ...compressionConfig.css,
+            ...lightningCssOptions,
             code: Buffer.from(cssContent),
             filename: filePath,
-            minify: true,
           });
 
           // Convert Uint8Array to string
@@ -233,6 +257,14 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
 
         logger.debug('Compression config:' + JSON.stringify(compressionConfig));
         logger.debug('Astro config:' + JSON.stringify(config));
+
+        if (hasCssTargetQueries) {
+          if (!resolvedCssTargets && cssTargetsErrorMessage) {
+            logger.warn(cssTargetsErrorMessage);
+          } else {
+            logger.info(`Configured CSS targets: ${cssTargetQueries}`);
+          }
+        }
       },
       'astro:build:done': async ({ assets, dir, logger }) => {
         const candidates = await traverseDirectory(dir);

@@ -18,7 +18,7 @@ describe('CSS Compression', () => {
           margin-top: 0px;  /* Zero units should be removed */
           color: #ffffff;  /* Should be shortened to #fff */
           background-color: #000000;  /* Should be shortened to #000 */
-        } 
+        }
 
         /* This comment should be removed */
         .button {
@@ -37,7 +37,7 @@ describe('CSS Compression', () => {
           -webkit-border-radius: 10px;
           -moz-border-radius: 10px;
           border-radius: 10px;
-          
+
           -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
           -moz-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
           box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
@@ -146,6 +146,42 @@ describe('CSS Compression', () => {
     expect(compressedSize).toBeLessThan(originalSize);
     expect(compressedContent).toMatch(/@media screen and \((?:min-width:1200px|width>=1200px)\)/);
     expect(compressedContent).toContain('body{background-color:#ff0}');
+  });
+
+  test('should apply browser-specific transforms when css.targets is set', async () => {
+    // Media query range syntax (width >= X) is downlevelled to (min-width: X) for older Safari targets.
+    const filePath = path.join(buildDir, TEST_CSS.withMediaQueryRange.name);
+
+    const compress = gabAstroCompress({ css: { targets: ['safari >= 14'] } });
+    await runCompression(compress);
+
+    const compressedContent = await fs.readFile(filePath, 'utf-8');
+
+    // Range syntax must be converted to the legacy min-width form for the given target.
+    expect(compressedContent).toContain('@media screen and (min-width:1200px)');
+    expect(compressedContent).not.toContain('width>=1200px');
+  });
+
+  test('should fall back gracefully when css.targets contains an invalid browserslist query', async () => {
+    const filePath = path.join(buildDir, TEST_CSS.basic.name);
+    const originalSize = await getFileSize(filePath);
+
+    const compress = gabAstroCompress({ css: { targets: ['not a valid query !!!'] } });
+
+    // Should not throw
+    await runCompression(compress);
+
+    // File must still exist
+    const exists = await fs
+      .access(filePath)
+      .then(() => true)
+      .catch(() => false);
+
+    expect(exists).toBe(true);
+
+    // CSS must still be minified (fallback: transform runs without targets)
+    const compressedSize = await getFileSize(filePath);
+    expect(compressedSize).toBeLessThan(originalSize);
   });
 
   test('should handle malformed CSS gracefully', async () => {

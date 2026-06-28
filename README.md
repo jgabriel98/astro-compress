@@ -51,9 +51,7 @@ You can customize the compression settings for different file types.
 - The compression for `html` is handled by [html-minifier-terser](https://github.com/terser/html-minifier-terser?tab=readme-ov-file#options-quick-reference). The gab-astro-compress integration wraps the corresponding html-minifier-terser options, so that you have full control over the compression process.
 - The compression for `js` is handled by [terser](https://terser.org/docs/api-reference#minify-options). The gab-astro-compress integration wraps the corresponding terser options, so that you have full control over the compression process.
 - The compression for `svg` is handled by [svgo](https://github.com/svg/svgo?tab=readme-ov-file#configuration).
-- The compression for `css` is handled by [Lightning CSS](https://lightningcss.dev/).
-
-The astro-compress integration wraps the corresponding tool options, so that you have full control over the compression process.
+- The compression for `css` is handled by [Lightning CSS](https://lightningcss.dev/). `css.targets` accepts [browserslist](https://browsersl.ist/) queries and applies the same browser-specific CSS transforms to both linked stylesheets and inline styles.
 
 Below you can find the default configuration for each file type. The effort parameter is set to max for all image formats. As we are using a cache this will provide the best compression at reasonable build times. You can override the default settings in your configuration for faster builds.
 
@@ -103,9 +101,35 @@ export const defaultConfig: CompressOptions = {
   svg: {
     multipass: true,
   },
-  css: {},
+  css: {
+    // targets: ['safari >= 15']
+  },
 };
 ```
+
+### CSS browser targets
+
+To make Lightning CSS apply browser-specific transforms (e.g. downlevelling modern CSS syntax for older browsers), pass one or more [browserslist](https://browsersl.ist/) queries to `css.targets`:
+
+```js
+astroCompress({
+  css: {
+    targets: ['safari >= 15'],
+  },
+});
+```
+
+Multiple queries are supported and follow standard browserslist union semantics:
+
+```js
+astroCompress({
+  css: {
+    targets: ['safari >= 15', 'chrome >= 100', 'firefox >= 110'],
+  },
+});
+```
+
+> **Note:** `css.targets` is independent from Vite's `build.target`. Vite's `build.target` controls JavaScript transpilation via esbuild; `css.targets` controls CSS transforms via Lightning CSS. Set both explicitly to keep them aligned.
 
 ## Default Configuration
 
