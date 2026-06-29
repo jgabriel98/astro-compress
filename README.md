@@ -5,7 +5,13 @@
 
 A powerful compression integration for static assets in Astro. This package automatically optimizes and compresses various file types including images, HTML, JavaScript, CSS, and SVG files during the build process.
 
-This integraton is inspired by [astro-compress](https://github.com/withastro/astro-compress) and I would like to thank Nikola Hristov for his excellent work. In my Astro project with hundreds of images, I found that the build time was too long. Because I had difficulty understanding the high level of abstraction in the original package, I decided to create my own solution. For small projects with few images, the original package is faster, but for larger projects with many images, this package is faster.
+This integration is inspired by [astro-compress](https://github.com/withastro/astro-compress) and I would like to thank Nikola Hristov for his excellent work. In my Astro project with hundreds of images, I found that the build time was too long. Because I had difficulty understanding the high level of abstraction in the original package, I decided to create my own solution. For small projects with few images, the original package is faster, but for larger projects with many images, this package is faster.
+
+## Update note
+
+Version `v0.2.0` adds support for Astro `v7`, which uses Vite `v8`. To stay aligned with Astro's tooling and asset generation pipeline, `gab-astro-compress` now uses Lightning CSS consistently for both standalone `.css` files and inline CSS in HTML.
+
+> **Known limitation:** `gab-astro-compress` is not yet compatible with Astro `v7`'s Content Security Policy (CSP) support. Contributions to add CSP compatibility are welcome.
 
 ## Features
 
