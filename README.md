@@ -19,8 +19,16 @@ This integraton is inspired by [astro-compress](https://github.com/withastro/ast
 
 ## Installation
 
+### npm
+
 ```bash
 npm install gab-astro-compress
+```
+
+### pnpm
+
+```bash
+pnpm add gab-astro-compress
 ```
 
 ## Usage
