@@ -3,12 +3,10 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 
 type Data = Parameters<typeof fs.writeFile>[1];
-export type TestFileConfig = { name: string, content: Data }
+export type TestFileConfig = { name: string; content: Data };
 
 export async function setupTestFiles(tempDir: string, files: Record<string, TestFileConfig>) {
-  await Promise.all(Object.values(files).map(fileInfo =>
-    setupTestFile(tempDir, fileInfo)
-  ));
+  await Promise.all(Object.values(files).map((fileInfo) => setupTestFile(tempDir, fileInfo)));
 }
 
 export async function setupTestFile(tempDir: string, fileInfo: TestFileConfig) {
@@ -31,14 +29,14 @@ export async function compareFiles(file1: string, file2: string): Promise<boolea
 
 // Create mock logger
 export const mockLogger: AstroIntegrationLogger = {
-  info: () => { },
-  debug: () => { },
-  warn: () => { },
+  info: () => {},
+  debug: () => {},
+  warn: () => {},
   error: console.error,
   fork: () => mockLogger,
   label: 'gab-astro-compress',
   options: {
     dest: { write: (_: any) => true },
     level: 'info',
-  }
+  },
 };

@@ -31,7 +31,7 @@ describe('JavaScript Compression', () => {
             const x = calculateSum(5, 10);
             console.log(longVariableName);
         }
-      `
+      `,
     },
     withES6: {
       name: 'modern.mjs',
@@ -52,8 +52,8 @@ describe('JavaScript Compression', () => {
 
         const [a, b, ...rest] = [1, 2, 3, 4, 5];
         const { property: renamed } = { property: "value" };
-      `
-    }
+      `,
+    },
   };
 
   beforeAll(async () => {
@@ -126,10 +126,10 @@ describe('JavaScript Compression', () => {
     expect(compressedSize).toBeLessThan(originalSize);
 
     // Verify ES6+ features are preserved
-    expect(compressedContent).toContain('=>');  // Arrow functions
-    expect(compressedContent).toContain('class');  // Class syntax
+    expect(compressedContent).toContain('=>'); // Arrow functions
+    expect(compressedContent).toContain('class'); // Class syntax
     expect(compressedContent).toContain('constructor');
-    expect(compressedContent).toContain('...rest');  // Rest operator
+    expect(compressedContent).toContain('...rest'); // Rest operator
   });
 
   test('should handle malformed JavaScript gracefully', async () => {
@@ -140,7 +140,7 @@ describe('JavaScript Compression', () => {
           const x = 'unclosed string
           return x
         }
-      `
+      `,
     };
 
     const filePath = await setupTestFile(buildDir, malformedJS);
@@ -152,10 +152,13 @@ describe('JavaScript Compression', () => {
     await runCompression(compress);
 
     // Original file should still exist and be unchanged
-    const exists = await fs.access(filePath).then(() => true).catch(() => false);
+    const exists = await fs
+      .access(filePath)
+      .then(() => true)
+      .catch(() => false);
     expect(exists).toBe(true);
 
     const finalContent = await fs.readFile(filePath, 'utf-8');
     expect(finalContent).toBe(originalContent);
   });
-}); 
+});

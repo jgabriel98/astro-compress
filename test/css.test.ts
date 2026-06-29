@@ -18,7 +18,7 @@ describe('CSS Compression', () => {
           margin-top: 0px;  /* Zero units should be removed */
           color: #ffffff;  /* Should be shortened to #fff */
           background-color: #000000;  /* Should be shortened to #000 */
-        } 
+        }
 
         /* This comment should be removed */
         .button {
@@ -28,7 +28,7 @@ describe('CSS Compression', () => {
           border-style: solid;
           border-color: black;  /* Should be combined into border shorthand */
         }
-      `
+      `,
     },
     withVendorPrefixes: {
       name: 'prefixes.css',
@@ -37,13 +37,23 @@ describe('CSS Compression', () => {
           -webkit-border-radius: 10px;
           -moz-border-radius: 10px;
           border-radius: 10px;
-          
+
           -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
           -moz-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
           box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         }
-      `
-    }
+      `,
+    },
+    withMediaQueryRange: {
+      name: 'media-query-range.css',
+      content: `
+        @media screen and (width >= 1200px) {
+          body {
+            background-color: yellow;
+          }
+        }
+      `,
+    },
   };
 
   beforeEach(async () => {
@@ -81,22 +91,22 @@ describe('CSS Compression', () => {
   test('should minify basic CSS', async () => {
     const filePath = path.join(buildDir, TEST_CSS.basic.name);
     const originalSize = await getFileSize(filePath);
-    
+
     const compress = gabAstroCompress();
     await runCompression(compress);
 
     const compressedContent = await fs.readFile(filePath, 'utf-8');
     const compressedSize = await getFileSize(filePath);
-    
+
     // Verify size reduction
     expect(compressedSize).toBeLessThan(originalSize);
-    
+
     // Verify optimizations
-    expect(compressedContent).toContain('padding:20px');  // Simplified padding
-    expect(compressedContent).toContain('margin-top:0');  // Removed unit from zero
-    expect(compressedContent).toContain('#fff');  // Shortened color
-    expect(compressedContent).toContain('#000');  // Shortened color
-    
+    expect(compressedContent).toContain('padding:20px'); // Simplified padding
+    expect(compressedContent).toContain('margin-top:0'); // Removed unit from zero
+    expect(compressedContent).toContain('#fff'); // Shortened color
+    expect(compressedContent).toContain('#000'); // Shortened color
+
     // Verify comment removal
     expect(compressedContent).not.toContain('/* This comment should be removed */');
   });
@@ -104,23 +114,74 @@ describe('CSS Compression', () => {
   test('should handle vendor prefixes', async () => {
     const filePath = path.join(buildDir, TEST_CSS.withVendorPrefixes.name);
     const originalSize = await getFileSize(filePath);
-    
+
     const compress = gabAstroCompress();
     await runCompression(compress);
 
     const compressedContent = await fs.readFile(filePath, 'utf-8');
     const compressedSize = await getFileSize(filePath);
-    
+
     // Verify size reduction
     expect(compressedSize).toBeLessThan(originalSize);
-    
+
     // Verify prefixes are preserved
     expect(compressedContent).toContain('-webkit-border-radius:10px');
     expect(compressedContent).toContain('-moz-border-radius:10px');
     expect(compressedContent).toContain('border-radius:10px');
-    
-    // Verify rgba color is compressed
-    expect(compressedContent).toContain('rgba(0,0,0,.5)');
+
+    // Verify color is optimized (Lightning CSS converts rgba to hex with alpha)
+    expect(compressedContent).toMatch(/rgba\(0,0,0,.5\)|#00000080/);
+  });
+
+  test('should handle CSS media query range syntax', async () => {
+    const filePath = path.join(buildDir, TEST_CSS.withMediaQueryRange.name);
+    const originalSize = await getFileSize(filePath);
+
+    const compress = gabAstroCompress();
+    await runCompression(compress);
+
+    const compressedContent = await fs.readFile(filePath, 'utf-8');
+    const compressedSize = await getFileSize(filePath);
+
+    expect(compressedSize).toBeLessThan(originalSize);
+    expect(compressedContent).toMatch(/@media screen and \((?:min-width:1200px|width>=1200px)\)/);
+    expect(compressedContent).toContain('body{background-color:#ff0}');
+  });
+
+  test('should apply browser-specific transforms when css.targets is set', async () => {
+    // Media query range syntax (width >= X) is downlevelled to (min-width: X) for older Safari targets.
+    const filePath = path.join(buildDir, TEST_CSS.withMediaQueryRange.name);
+
+    const compress = gabAstroCompress({ css: { targets: ['safari >= 14'] } });
+    await runCompression(compress);
+
+    const compressedContent = await fs.readFile(filePath, 'utf-8');
+
+    // Range syntax must be converted to the legacy min-width form for the given target.
+    expect(compressedContent).toContain('@media screen and (min-width:1200px)');
+    expect(compressedContent).not.toContain('width>=1200px');
+  });
+
+  test('should fall back gracefully when css.targets contains an invalid browserslist query', async () => {
+    const filePath = path.join(buildDir, TEST_CSS.basic.name);
+    const originalSize = await getFileSize(filePath);
+
+    const compress = gabAstroCompress({ css: { targets: ['not a valid query !!!'] } });
+
+    // Should not throw
+    await runCompression(compress);
+
+    // File must still exist
+    const exists = await fs
+      .access(filePath)
+      .then(() => true)
+      .catch(() => false);
+
+    expect(exists).toBe(true);
+
+    // CSS must still be minified (fallback: transform runs without targets)
+    const compressedSize = await getFileSize(filePath);
+    expect(compressedSize).toBeLessThan(originalSize);
   });
 
   test('should handle malformed CSS gracefully', async () => {
@@ -131,22 +192,25 @@ describe('CSS Compression', () => {
           color: red  /* Missing closing brace */
         .another {
           display: block;
-      `
+      `,
     };
 
     const filePath = await setupTestFile(tempDir, malformedCSS);
     const originalContent = await fs.readFile(filePath, 'utf-8');
-    
+
     const compress = gabAstroCompress();
-    
+
     // Should not throw error
     await runCompression(compress);
 
     // Original file should still exist and be unchanged
-    const exists = await fs.access(filePath).then(() => true).catch(() => false);
+    const exists = await fs
+      .access(filePath)
+      .then(() => true)
+      .catch(() => false);
     expect(exists).toBe(true);
-    
+
     const finalContent = await fs.readFile(filePath, 'utf-8');
     expect(finalContent).toBe(originalContent);
   });
-}); 
+});

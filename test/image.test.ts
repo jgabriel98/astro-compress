@@ -19,20 +19,22 @@ describe('Image Compression', async () => {
           width: 1000,
           height: 1000,
           channels: 4,
-          background: { r: 255, g: 0, b: 0, alpha: 1 }
-        }
+          background: { r: 255, g: 0, b: 0, alpha: 1 },
+        },
       })
-        .composite([{
-          input: Buffer.from(new Array(1000 * 1000 * 4).fill(128)), // Add noise
-          raw: {
-            width: 1000,
-            height: 1000,
-            channels: 4
+        .composite([
+          {
+            input: Buffer.from(new Array(1000 * 1000 * 4).fill(128)), // Add noise
+            raw: {
+              width: 1000,
+              height: 1000,
+              channels: 4,
+            },
+            blend: 'overlay',
           },
-          blend: 'overlay'
-        }])
+        ])
         .png({ compressionLevel: 1 }) // Start with low compression
-        .toBuffer()
+        .toBuffer(),
     },
     jpeg: {
       name: 'test.jpg',
@@ -41,20 +43,22 @@ describe('Image Compression', async () => {
           width: 1000,
           height: 1000,
           channels: 3,
-          background: { r: 0, g: 0, b: 255 }
-        }
+          background: { r: 0, g: 0, b: 255 },
+        },
       })
-        .composite([{
-          input: Buffer.from(new Array(1000 * 1000 * 3).fill(128)), // Add noise
-          raw: {
-            width: 1000,
-            height: 1000,
-            channels: 3
+        .composite([
+          {
+            input: Buffer.from(new Array(1000 * 1000 * 3).fill(128)), // Add noise
+            raw: {
+              width: 1000,
+              height: 1000,
+              channels: 3,
+            },
+            blend: 'overlay',
           },
-          blend: 'overlay'
-        }])
+        ])
         .jpeg({ quality: 100 }) // Start with high quality
-        .toBuffer()
+        .toBuffer(),
     },
     webp: {
       name: 'test.webp',
@@ -63,20 +67,22 @@ describe('Image Compression', async () => {
           width: 1000,
           height: 1000,
           channels: 4,
-          background: { r: 0, g: 255, b: 0, alpha: 1 }
-        }
+          background: { r: 0, g: 255, b: 0, alpha: 1 },
+        },
       })
-        .composite([{
-          input: Buffer.from(new Array(1000 * 1000 * 4).fill(128)), // Add noise
-          raw: {
-            width: 1000,
-            height: 1000,
-            channels: 4
+        .composite([
+          {
+            input: Buffer.from(new Array(1000 * 1000 * 4).fill(128)), // Add noise
+            raw: {
+              width: 1000,
+              height: 1000,
+              channels: 4,
+            },
+            blend: 'overlay',
           },
-          blend: 'overlay'
-        }])
+        ])
         .webp({ quality: 100, effort: 0 }) // Start with high quality, low effort
-        .toBuffer()
+        .toBuffer(),
     },
     avif: {
       name: 'test.avif',
@@ -85,20 +91,22 @@ describe('Image Compression', async () => {
           width: 1000,
           height: 1000,
           channels: 4,
-          background: { r: 0, g: 255, b: 0, alpha: 1 }
-        }
+          background: { r: 0, g: 255, b: 0, alpha: 1 },
+        },
       })
-        .composite([{
-          input: Buffer.from(new Array(1000 * 1000 * 4).fill(128)), // Add noise
-          raw: {
-            width: 1000,
-            height: 1000,
-            channels: 4
+        .composite([
+          {
+            input: Buffer.from(new Array(1000 * 1000 * 4).fill(128)), // Add noise
+            raw: {
+              width: 1000,
+              height: 1000,
+              channels: 4,
+            },
+            blend: 'overlay',
           },
-          blend: 'overlay'
-        }])
+        ])
         .avif({ quality: 100, effort: 0 })
-        .toBuffer()
+        .toBuffer(),
     },
     heif: {
       name: 'test.heif',
@@ -107,25 +115,27 @@ describe('Image Compression', async () => {
           width: 1000,
           height: 1000,
           channels: 4,
-          background: { r: 0, g: 255, b: 0, alpha: 1 }
-        }
+          background: { r: 0, g: 255, b: 0, alpha: 1 },
+        },
       })
-        .composite([{
-          input: Buffer.from(new Array(1000 * 1000 * 4).fill(128)), // Add noise
-          raw: {
-            width: 1000,
-            height: 1000,
-            channels: 4
+        .composite([
+          {
+            input: Buffer.from(new Array(1000 * 1000 * 4).fill(128)), // Add noise
+            raw: {
+              width: 1000,
+              height: 1000,
+              channels: 4,
+            },
+            blend: 'overlay',
           },
-          blend: 'overlay'
-        }])
+        ])
         .heif({ quality: 100, effort: 0, compression: 'av1' })
-        .toBuffer()
+        .toBuffer(),
     },
     corruptImage: {
       name: 'corrupt.png',
-      content: Buffer.from('not a real image')
-    }
+      content: Buffer.from('not a real image'),
+    },
   };
 
   beforeAll(async () => {
@@ -170,8 +180,8 @@ describe('Image Compression', async () => {
     const compress = gabAstroCompress({
       png: {
         compressionLevel: 9,
-        palette: true
-      }
+        palette: true,
+      },
     });
 
     await runCompression(compress);
@@ -188,7 +198,8 @@ describe('Image Compression', async () => {
     expect(metadata.format).toBe('png');
   });
 
-  test('should compress JPEG images', async () => {// Set up test files
+  test('should compress JPEG images', async () => {
+    // Set up test files
     const filePath = await setupTestFile(buildDir, TEST_IMAGES.jpeg);
     const originalSize = await getFileSize(filePath);
 
@@ -197,8 +208,8 @@ describe('Image Compression', async () => {
         mozjpeg: true,
         trellisQuantisation: true,
         overshootDeringing: true,
-        optimizeScans: true
-      }
+        optimizeScans: true,
+      },
     });
 
     await runCompression(compress);
@@ -222,8 +233,8 @@ describe('Image Compression', async () => {
 
     const compress = gabAstroCompress({
       webp: {
-        effort: 6
-      }
+        effort: 6,
+      },
     });
 
     await runCompression(compress);
@@ -247,8 +258,8 @@ describe('Image Compression', async () => {
 
     const compress = gabAstroCompress({
       avif: {
-        effort: 2
-      }
+        effort: 2,
+      },
     });
 
     await runCompression(compress);
@@ -273,8 +284,8 @@ describe('Image Compression', async () => {
 
     const compress = gabAstroCompress({
       heif: {
-        effort: 2
-      }
+        effort: 2,
+      },
     });
 
     await runCompression(compress);
@@ -303,10 +314,13 @@ describe('Image Compression', async () => {
     await runCompression(compress);
 
     // Original file should still exist and be unchanged
-    const exists = await fs.access(filePath).then(() => true).catch(() => false);
+    const exists = await fs
+      .access(filePath)
+      .then(() => true)
+      .catch(() => false);
     expect(exists).toBe(true);
 
     const finalContent = await fs.readFile(filePath);
     expect(Buffer.compare(originalContent, finalContent)).toBe(0);
   });
-}); 
+});
