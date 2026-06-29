@@ -26,6 +26,10 @@ export type LightningCssOptions = Omit<
   targets?: string[];
 };
 
+export type HtmlCompressionOptions = Omit<HtmlMinifierOptions, 'minifyCSS'> & {
+  minifyCSS?: boolean;
+};
+
 export interface FormatCompressionOptions {
   png?: PngOptions;
   jpeg?: JpegOptions;
@@ -35,7 +39,7 @@ export interface FormatCompressionOptions {
   heif?: HeifOptions;
   gif?: GifOptions;
   tiff?: TiffOptions;
-  html?: HtmlMinifierOptions;
+  html?: HtmlCompressionOptions;
   js?: MinifyOptions;
   svg?: SvgoConfig;
   css?: LightningCssOptions;

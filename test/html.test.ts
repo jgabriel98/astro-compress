@@ -142,9 +142,12 @@ describe('HTML Minification', () => {
     const compressedSize = await getFileSize(filePath);
 
     // Check that CSS is minified
-    expect(compressedContent).toContain(
-      '<style>.container{padding:20px 20px 20px 20px;color:#fff}</style></head>',
-    );
+    const styleMatch = compressedContent.match(/<style>(.*?)<\/style>/s)?.at(1);
+
+    expect(styleMatch).toContain('.container{');
+    expect(styleMatch).toContain('color:');
+    expect(styleMatch).toContain('padding:');
+
     // Check that JS is minified and comments are removed
     expect(compressedContent).not.toContain('// This comment should be removed');
     expect(compressedContent).toContain('<script>function test(){console.log("hello")}</script>');

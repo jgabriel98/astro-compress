@@ -173,7 +173,48 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
         }
       } else if (/\.(html|htm)$/i.test(filePath)) {
         const htmlContent = fs.readFileSync(filePath, 'utf-8');
-        const minifiedHtml = await minify(htmlContent, compressionConfig.html);
+        const enableCSS = compressionConfig.html.minifyCSS !== false;
+        const minifiedHtml = await minify(htmlContent, {
+          ...compressionConfig.html,
+          minifyCSS: enableCSS
+            ? (css: string, type?: string): string => {
+                try {
+                  switch (type) {
+                    // inline `<style>` CSS block
+                    case undefined: {
+                      return transform({
+                        ...lightningCssOptions,
+                        filename: 'inline.css',
+                        code: Buffer.from(css),
+                      }).code.toString();
+                    }
+
+                    // `style` HTML attribute
+                    case 'inline': {
+                      const wrapped = `.__tmp__{${css}}`;
+
+                      const result = transform({
+                        ...lightningCssOptions,
+                        filename: 'inline-style.css',
+                        code: Buffer.from(wrapped),
+                      }).code.toString();
+
+                      const start = result.indexOf('{');
+                      const end = result.lastIndexOf('}');
+
+                      return start >= 0 && end > start ? result.slice(start + 1, end) : css;
+                    }
+
+                    default:
+                      return css;
+                  }
+                } catch {
+                  return css;
+                }
+              }
+            : false,
+        });
+
         processingResult = handleCompressedResult(minifiedHtml);
       } else if (/\.(js|mjs)$/i.test(filePath)) {
         const jsContent = fs.readFileSync(filePath, 'utf-8');

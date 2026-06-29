@@ -12,7 +12,7 @@ This integraton is inspired by [astro-compress](https://github.com/withastro/ast
 - 🖼️ Image optimization (PNG, JPEG, JXL, WebP, AVIF, HEIF, GIF, TIFF)
 - 📄 HTML minification
 - 🔧 JavaScript minification
-- 🎨 CSS minification
+- 🎨 CSS minification using Lightning CSS
 - 📐 SVG optimization
 - 💾 Caching system for faster builds
 - ⚙️ Highly configurable compression settings
@@ -48,7 +48,7 @@ export default defineConfig({
 You can customize the compression settings for different file types.
 
 - The compression for `png`, `jpeg`, `jxl`, `webp`, `avif`, `heif`, `gif` and `tiff` is handled by [sharp](https://sharp.pixelplumbing.com/api-output#png). The gab-astro-compress integration wraps the corresponding sharp options, so that you have full control over the compression process.
-- The compression for `html` is handled by [html-minifier-terser](https://github.com/terser/html-minifier-terser?tab=readme-ov-file#options-quick-reference). The gab-astro-compress integration wraps the corresponding html-minifier-terser options, so that you have full control over the compression process.
+- The compression for `html` is handled by [html-minifier-terser](https://github.com/terser/html-minifier-terser?tab=readme-ov-file#options-quick-reference) for HTML markup. When `html.minifyCSS` is enabled, inline CSS in `<style>` blocks and `style=""` attributes is processed automatically by [Lightning CSS](https://lightningcss.dev/) the same configured way as standalone `.css` files.
 - The compression for `js` is handled by [terser](https://terser.org/docs/api-reference#minify-options). The gab-astro-compress integration wraps the corresponding terser options, so that you have full control over the compression process.
 - The compression for `svg` is handled by [svgo](https://github.com/svg/svgo?tab=readme-ov-file#configuration).
 - The compression for `css` is handled by [Lightning CSS](https://lightningcss.dev/). `css.targets` accepts [browserslist](https://browsersl.ist/) queries and applies the same browser-specific CSS transforms to both linked stylesheets and inline styles.
