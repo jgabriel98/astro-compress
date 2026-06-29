@@ -1,4 +1,4 @@
-import type { AstroConfig, AstroIntegration, AstroIntegrationLogger } from 'astro';
+import type { AstroIntegration, AstroIntegrationLogger } from 'astro';
 import chalk from 'chalk';
 import { createHash } from 'crypto';
 import browserslist from 'browserslist';
@@ -84,7 +84,6 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
   };
   // Lightning CSS options end
 
-  let astroConfig: AstroConfig;
   let originalSizeTotal = 0;
   let newSizeTotal = 0;
   let processedFiles = 0;
@@ -283,7 +282,6 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
     hooks: {
       'astro:config:done': async ({ config, logger }) => {
         logger.info('gab-astro-compress started');
-        astroConfig = config; // Store Astro's config separately
 
         if (compressionConfig.cache?.enabled) {
           cacheManager = new CompressionCacheManagerImpl(
@@ -307,7 +305,7 @@ export default function GabAstroCompress(options: CompressOptions = {}): AstroIn
           }
         }
       },
-      'astro:build:done': async ({ assets, dir, logger }) => {
+      'astro:build:done': async ({ dir, logger }) => {
         const candidates = await traverseDirectory(dir);
         const dirPath = fileURLToPath(dir);
         let promises: Promise<any>[] = [];

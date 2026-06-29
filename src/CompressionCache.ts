@@ -1,10 +1,8 @@
 import type { AstroIntegrationLogger } from 'astro';
-import { createHash } from 'crypto';
 import { mkdirSync, readFileSync, unlink, writeFileSync } from 'fs';
 import { stat } from 'fs/promises';
 import path from 'path';
 import { UsedFormatConfig } from './types';
-import chalk from 'chalk';
 
 /**
  * Current cache manifest format version.
